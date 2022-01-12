@@ -38,20 +38,26 @@
 Description                            |解决办法                           |
  ------------------------------------ | ------------------------------------ |
 根据不同环境进行打包，共同项配置抽取出来 | 创建3个文件common.js（通用配置）,dev.js（开发环境）,prod.js（生产环境），引入webpack-merge包，参考 [环境配置](#production)
+ 开发环境下的跨域问题解决方案 |proxy can only proxy local domain names to the corresponding domain names, not other domain names to the corresponding domain names（devServer.proxy，只对localhost有效，即baseURL:""） |
 path.resolve用法 |解析为绝对路径，可理解为cd命令，一层层拼接|
  禁止生成xx.js.LICENSE.txt文件 |webpack已集成TerserPlugin，```   new TerserPlugin({ extractComments: false,}) ```|
 不打包js库，而通过cdn引入|  ```externals: { jquery: "jQuery",axios:"axios",dayjs: "dayjs",},```|
  打包生成的js文件头部加上package版本号 |```const packageinfo = require("./package.json");```|
 依赖的node_modules不打包在使用的js文件中，而是全部打包到一个js文件中|```splitChunks: {chunks: "all",},```带来的问题是1个js文件过大，可采用externals优化或cacheGroups配置提取指定的module|
-
+生产环境下文件压缩优化方案|webpack5以上版本自带TerserPlugin|
+ 
 <h1 align="center">常见问题</h1>
 
 | 场景 |Error Description                            |解决办法                           |
 | --------- | ------------------------------------ | ------------------------------------ |
 | <img width="40" height="40" src="https://cdn.worldvectorlogo.com/logos/internet-explorer-2.svg">       | `Automatic publicPath is not supported in this browser` | 参考官方文档、定义publicPath|
 | <img width="40" height="40" src="https://cdn.worldvectorlogo.com/logos/internet-explorer-2.svg">        | SCRIPT5022: SecurityError |重启IE浏览器
-| <img width="40" height="40" src="https://cdn.worldvectorlogo.com/logos/internet-explorer-2.svg">        | ES6、Promise等语法错误 |使用babel、target设置其编辑环境
+| <img width="40" height="40" src="https://cdn.worldvectorlogo.com/logos/internet-explorer-2.svg">        | ES6、Promise等语法错误 |使用babel、target设置其编译环境
 |<img width="30" height="30" src="https://cdn.worldvectorlogo.com/logos/chrome.svg"> <img width="30" height="30" src="https://cdn.worldvectorlogo.com/logos/internet-explorer-2.svg"> | axios请求参数中文乱码 | service.get(url,params)使用params参数，不要拼接到url后面
+|| proxy代理不起效 |   ```devServer: {proxy: {'http://xxx/api/report': 'http://yyy/api/report',},,```proxy只能代理local domain，即"/api/**"
+|  | proxy代理请求失败  <font color=red>```[webpack-dev-server] [HPM] Error occurred while proxying request localhost:3000```</font>|注意host配置，所代理的url是否配置为了127.0.0.1
+|  | devtool开发环境下debug，中文乱码问题|开发环境使用“source-map”或“cheap-source-map”，不要使用带有eval函数，eval会将source-map内容转化为base64后内嵌到build.js中
+
 
 <h1 align="center">webpack配置文件</h1>
 
@@ -120,6 +126,13 @@ module.exports = merge(common, {
     hot: true,
     historyApiFallback: true,
     allowedHosts: "all",
+    proxy: {
+      "/api/**": {
+        target: "http://report.orientsec.com.cn",
+        secure: false,
+        changeOrigin: true,
+      },
+    },
   },
   plugins: [
     new HtmlWebpackPlugin({
@@ -261,3 +274,6 @@ https://webpack.js.org/plugins/define-plugin/#usage
 
 ## Externals
 https://webpack.js.org/configuration/externals/#root
+
+## Terser
+https://webpack.js.org/plugins/terser-webpack-plugin/
