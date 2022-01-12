@@ -35,7 +35,7 @@
 
 <h1 align="center">Usage</h1>
 
-Description                            |解决办法                           |
+Description                            |解决办法                            |
  ------------------------------------ | ------------------------------------ |
 根据不同环境进行打包，共同项配置抽取出来 | 创建3个文件common.js（通用配置）,dev.js（开发环境）,prod.js（生产环境），引入webpack-merge包，参考 [环境配置](#production)
  开发环境下的跨域问题解决方案 |proxy can only proxy local domain names to the corresponding domain names, not other domain names to the corresponding domain names（devServer.proxy，只对localhost有效，即baseURL:""） |
